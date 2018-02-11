@@ -1,0 +1,9 @@
+*.bat
+*.doc
+*.docx
+*.pdf
+*.ppt
+*.pptm
+*.xml
+python/.idea/workspace.xml
+
