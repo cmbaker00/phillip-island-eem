@@ -1,0 +1,19 @@
+,Cats,Rats,Goshawks,Hawk owls,Flying foxes,Frugivorous birds,Thrushes,White eyes,Brown boobies,Tropicbirds,Geckos,Insect resources (diurnal) ,Insect resources (nocturnal),Fruit resources (ground),Fruit resources (canopy),Crabs,Kestrels,Chickens
+Cats,-1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1
+Rats,-1,-1,1,-1,0,1,1,1,1,1,1,1,0,1,1,-1,-1,1
+Goshawks,0,1,-1,0,0,1,1,1,0,1,0,1,0,0,0,0,0,1
+Hawk owls,0,1,0,-1,0,0,0,1,0,0,1,0,1,0,0,0,0,0
+Flying foxes,-1,0,0,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,0
+Frugivorous birds,-1,-1,-1,0,0,-1,0,0,0,0,0,0,0,1,0,0,0,0
+Thrushes,-1,-1,-1,0,0,0,-1,0,0,0,0,1,0,0,0,0,0,0
+White eyes,-1,-1,-1,-1,0,0,0,-1,0,0,0,1,0,0,0,0,0,0
+Brown boobies,-1,-1,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0
+Tropicbirds,-1,-1,-1,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0
+Geckos,-1,-1,0,-1,0,0,0,0,0,0,-1,0,1,0,0,0,0,0
+Insect resources (diurnal) ,-1,-1,-1,0,0,0,-1,-1,0,0,0,-1,0,0,0,0,0,-1
+Insect resources (nocturnal),0,-1,0,0,0,0,0,0,0,0,1,0,-1,0,0,0,-1,0
+Fruit resources (ground),0,-1,0,0,0,-1,0,0,0,0,0,0,0,-1,0,-1,0,0
+Fruit resources (canopy),0,-1,0,0,0,-1,0,0,0,0,0,0,0,0,-1,0,0,0
+Crabs,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,-1,0,0
+Kestrels,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0
+Chickens,-1,-1,-1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,-1

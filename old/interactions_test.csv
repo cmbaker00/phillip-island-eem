@@ -1,0 +1,9 @@
+Dingo,Dingo,Mesopredators,Large Herbivores,Small Vertebrates,Grass,Invertebrates,Fire,Soil
+Dingo,-1,0,1,0,0,0,0,0
+Mesopredators,-1,-1,0,1,0,0,0,0
+Kangaroo,-1,0,-1,0,1,0,0,0
+Mouse,0,-1,0,-1,1,1,0,0
+Grass,0,0,-1,0,-1,1,0,1
+Invert,0,0,0,-1,1,-1,0,1
+Fire,0,0,0,0,1,0,-1,0
+Soil,0,0,0,0,0,1,1,-1
