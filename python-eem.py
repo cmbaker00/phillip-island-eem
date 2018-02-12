@@ -19,7 +19,7 @@ def read_vector(fname):
     sheets = wb.sheetnames
     ws = wb[sheets[0]]
     n_row = num_rows(ws, st = 1)
-    r = np.array(read_all_rows(ws, 1, n_row, 1, 1))
+    r = np.array(read_all_rows(ws, 1, n_row, 2, 2))
     return r
 
 
@@ -74,3 +74,4 @@ def iter_all_strings():
         size +=1
 
 print(read_matrix('Phillip_islands_community.xlsx'))
+print(read_vector('Phillip_islands_r.xlsx'))
