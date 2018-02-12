@@ -14,6 +14,15 @@ def read_matrix(fname):
     m = np.array(read_all_rows(ws, 2, n_row, 2, n_col))
     return m
 
+def read_vector(fname):
+    wb = load_workbook(filename = fname)
+    sheets = wb.sheetnames
+    ws = wb[sheets[0]]
+    n_row = num_rows(ws, st = 1)
+    r = np.array(read_all_rows(ws, 1, n_row, 1, 1))
+    return r
+
+
 def read_row(ws, row, st, ed):
     counter = 1
     output = []
