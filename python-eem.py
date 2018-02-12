@@ -35,7 +35,7 @@ def read_row(ws, row, st, ed):
 
 def read_all_rows(ws, rows, rowe, st, ed):
     arr = []
-    for row in range(rows, rowe):
+    for row in range(rows, rowe + 1):
         c_row = read_row(ws, row, st, ed)
         c_row = none_2_zero(c_row)
         arr.append(c_row)
@@ -73,5 +73,17 @@ def iter_all_strings():
             yield "".join((s.upper() for s in s))
         size +=1
 
-print(read_matrix('Phillip_islands_community.xlsx'))
-print(read_vector('Phillip_islands_r.xlsx'))
+def equilibrium_state(A,r):
+    #rn + An.*n = 0
+    #r + An = 0
+    #An = -r
+    #inv(A)A n = inv(A)*(-r)
+    #n = inv(a)*(-r)
+    iA = np.linalg.inv(A)
+    n = -np.matmul(iA,r)
+    return n
+
+A = read_matrix('Phillip_islands_community.xlsx')
+r = read_vector('Phillip_islands_r.xlsx')
+n = equilibrium_state(A,r)
+print(n)
