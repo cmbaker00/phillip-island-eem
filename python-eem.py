@@ -25,15 +25,11 @@ def read_row(ws, row, st, ed):
         counter += 1
 
 def read_all_rows(ws, rows, rowe, st, ed):
-    flag = True
+    arr = []
     for row in range(rows, rowe):
         c_row = read_row(ws, row, st, ed)
         c_row = none_2_zero(c_row)
-        if flag:
-            arr = [c_row]
-            flag = False
-        else:
-            arr.append(c_row)
+        arr.append(c_row)
     return arr
 
 def none_2_zero(arr):
@@ -68,4 +64,4 @@ def iter_all_strings():
             yield "".join((s.upper() for s in s))
         size +=1
 
-read_matrix('Phillip_islands_community.xlsx')
+print(read_matrix('Phillip_islands_community.xlsx'))
