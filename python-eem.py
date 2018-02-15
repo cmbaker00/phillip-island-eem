@@ -2,6 +2,7 @@ from openpyxl import load_workbook
 from string import ascii_lowercase
 import itertools
 import numpy as np
+import numpy.matlib
 
 def read_matrix(fname):
     wb = load_workbook(filename = fname)
@@ -74,16 +75,29 @@ def iter_all_strings():
         size +=1
 
 def equilibrium_state(A,r):
-    #rn + An.*n = 0
-    #r + An = 0
-    #An = -r
-    #inv(A)A n = inv(A)*(-r)
-    #n = inv(a)*(-r)
     iA = np.linalg.inv(A)
     n = -np.matmul(iA,r)
     return n
 
+def calc_jacobian(A,r,n):
+    i_matrix = np.eye(len(n))
+
+    J = i_matrix*r + A*np.matlib.repmat(n,1,len(n)) + i_matrix*np.matmul(A,n)
+
+    return J
+
+def calc_stability(A, r, n):
+    J = calc_jacobian(A, r, n)
+    ev = np.real(np.linalg.eig(J)[0])
+    max_eig = np.max(ev)
+    if max_eig < 0:
+        return True
+    else:
+        return False
+
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
 n = equilibrium_state(A,r)
-print(n)
+J = calc_jacobian(A,r,n)
+st = calc_stability(A, r, n)
+print(st)
