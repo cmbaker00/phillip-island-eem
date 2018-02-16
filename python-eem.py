@@ -102,13 +102,33 @@ def draw_parameters(A,r):
     A[(unc_draws < .5) & unc_int] = 0
     A[A==2] = 1
     A[A==-2] = -1
+    A_vals = (A*int_str)
+    # A_vals = multiply_diag(A_vals)
+    A_vals -= np.eye(np.shape(A_vals)[0])
     r_vals = np.random.uniform(0,1,np.shape(r))
-    return (A*int_str), r_vals
+    return A_vals, r_vals
 
+def gen_stable_param_set(A,r):
+    flag = 0
+    count = 0
+    while flag == 0:
+        At, rt = draw_parameters(A,r)
+        n = equilibrium_state(At, rt)
+        if np.all(n > 0):
+            st = calc_stability(At, rt, n)
+            if st:
+                return At, rt, n
+        count += 1
+        print(count)
+
+def multiply_diag(A, factor):
+    A[np.eye(A.shape[0]) == 1] = A[np.eye(A.shape[0]) == 1] * factor
+    return A
 
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
 n = equilibrium_state(A,r)
 J = calc_jacobian(A,r,n)
 st = calc_stability(A, r, n)
-print(st)
+# print(st)
+print(gen_stable_param_set(A,r))
