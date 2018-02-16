@@ -81,8 +81,11 @@ def equilibrium_state(A,r):
 
 def calc_jacobian(A,r,n):
     i_matrix = np.eye(len(n))
-
-    J = i_matrix*r + A*np.matlib.repmat(n,1,len(n)) + i_matrix*np.matmul(A,n)
+    if len(n.shape) == 1:
+        n_array = np.matlib.repmat(n,len(n),1).T
+    else:
+        n_array = np.matlib.repmat(n,1,len(n))
+    J = i_matrix*r + A*n_array + i_matrix*np.matmul(A,n)
 
     return J
 
@@ -151,6 +154,12 @@ def remove_rows_cols(A, r, inds):
     rn = np.delete(r, inds)
     return An, rn
 
+def gen_reduced_params(A,r,inds = None):
+    if inds != None:
+        A, r = remove_rows_cols(A, r, inds)
+    Ap, rp, np = gen_stable_param_set(A, r)
+    return Ap, rp, np
+
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
 n = equilibrium_state(A,r)
@@ -159,3 +168,4 @@ st = calc_stability(A, r, n)
 # print(st)
 print(gen_stable_param_set(A,r))
 remove_rows_cols(A,r,[2,5])
+print(gen_reduced_params(A,r,[2,5]))
