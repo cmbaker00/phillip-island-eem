@@ -95,6 +95,17 @@ def calc_stability(A, r, n):
     else:
         return False
 
+def draw_parameters(A,r):
+    int_str = np.random.uniform(0,1,np.shape(A))
+    unc_int = np.abs(A) == 2
+    unc_draws = np.random.uniform(0,1,np.shape(A))
+    A[(unc_draws < .5) & unc_int] = 0
+    A[A==2] = 1
+    A[A==-2] = -1
+    r_vals = np.random.uniform(0,1,np.shape(r))
+    return (A*int_str), r_vals
+
+
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
 n = equilibrium_state(A,r)
