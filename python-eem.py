@@ -125,6 +125,12 @@ def multiply_diag(A, factor):
     A[np.eye(A.shape[0]) == 1] = A[np.eye(A.shape[0]) == 1] * factor
     return A
 
+def remove_row_col(A,ind):
+    A_shp = A.shape[0]
+    if ind == 0:
+        return A[1:A_shp,1:A_shp]
+    if ind == #TODO add the final number
+
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
 n = equilibrium_state(A,r)
