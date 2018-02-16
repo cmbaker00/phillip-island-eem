@@ -154,11 +154,21 @@ def remove_rows_cols(A, r, inds):
     rn = np.delete(r, inds)
     return An, rn
 
-def gen_reduced_params(A,r,inds = None):
+def gen_reduced_params(A,r,inds = None, reps = 1):
+    A_output, r_output, n_output = None, None, None
     if inds != None:
         A, r = remove_rows_cols(A, r, inds)
-    Ap, rp, np = gen_stable_param_set(A, r)
-    return Ap, rp, np
+    for i in range(reps):
+        Ap, rp, Np = gen_stable_param_set(A, r)
+        if i == 0:
+            A_output = np.array([Ap])
+            r_output = np.array([rp])
+            n_output = np.array([Np])
+        else:
+            A_output = np.array([A_output, Ap])
+            r_output = np.array([r_output, rp])
+            n_output = np.array([n_output, Np])
+    return A_output, r_output, n_output
 
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
@@ -168,4 +178,4 @@ st = calc_stability(A, r, n)
 # print(st)
 print(gen_stable_param_set(A,r))
 remove_rows_cols(A,r,[2,5])
-print(gen_reduced_params(A,r,[2,5]))
+print(gen_reduced_params(A,r,[2,5],5))
