@@ -128,8 +128,28 @@ def multiply_diag(A, factor):
 def remove_row_col(A,ind):
     A_shp = A.shape[0]
     if ind == 0:
-        return A[1:A_shp,1:A_shp]
-    if ind == #TODO add the final number
+        return A[1:A_shp, 1:A_shp]
+    if ind == A_shp - 1:
+        return A[0:A_shp - 1, 1:A_shp - 1]
+    #If it is a 'central' option
+    A_top_left = A[0:ind, 0:ind]
+    A_top_right = A[0:ind, ind+1:A_shp]
+    A_bottom_left = A[ind+1:A_shp, 0:ind]
+    A_bottom_right = A[ind+1:A_shp, ind+1:A_shp]
+    A_top = np.hstack([A_top_left, A_top_right])
+    A_bottom = np.hstack([A_bottom_left, A_bottom_right])
+    A_new = np.vstack([A_top, A_bottom])
+    return A_new
+
+
+def remove_rows_cols(A, r, inds):
+    inds.sort()
+    inds.reverse()
+    An = A
+    for ind in inds:
+        An = remove_row_col(An, ind)
+    rn = np.delete(r, inds)
+    return An, rn
 
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
@@ -138,3 +158,4 @@ J = calc_jacobian(A,r,n)
 st = calc_stability(A, r, n)
 # print(st)
 print(gen_stable_param_set(A,r))
+remove_rows_cols(A,r,[2,5])
