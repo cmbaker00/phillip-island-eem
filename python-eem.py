@@ -175,13 +175,16 @@ def gen_reduced_params(A,r,inds = None, reps = 1):
         if inds != None:
             Ap, rp, Np = add_rows_cols(Ap, rp, Np, inds)
         if i == 0:
-            A_output = np.array([Ap])
-            r_output = np.array([rp])
-            n_output = np.array([Np])
+            A_output = [Ap]
+            r_output = [rp]
+            n_output = [Np]
         else:
-            A_output = np.array([A_output, Ap])
-            r_output = np.array([r_output, rp])
-            n_output = np.array([n_output, Np])
+            A_output.append(Ap)
+            r_output.append(rp)
+            n_output.append(Np)
+    A_output = np.array(A_output)
+    r_output = np.array(r_output)
+    n_output = np.array(n_output)
     return A_output, r_output, n_output
 
 def de(t, y, A, r):
