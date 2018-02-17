@@ -3,6 +3,7 @@ from string import ascii_lowercase
 import itertools
 import numpy as np
 import numpy.matlib
+from scipy.integrate import ode
 
 def read_matrix(fname):
     wb = load_workbook(filename = fname)
@@ -183,6 +184,8 @@ def gen_reduced_params(A,r,inds = None, reps = 1):
             n_output = np.array([n_output, Np])
     return A_output, r_output, n_output
 
+def de(t, y, A, r):
+    return r*y + np.matmul(A,y)*y
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
 n = equilibrium_state(A,r)
@@ -191,4 +194,4 @@ st = calc_stability(A, r, n)
 # print(st)
 print(gen_stable_param_set(A,r))
 # remove_rows_cols(A,r,[2,5])
-print(gen_reduced_params(A,r,[2,5],5))
+print(gen_reduced_params(A,r,[2,5],5)) #TODO this returns a bunch of nested arrays
