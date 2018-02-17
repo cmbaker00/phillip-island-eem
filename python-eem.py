@@ -154,12 +154,25 @@ def remove_rows_cols(A, r, inds):
     rn = np.delete(r, inds)
     return An, rn
 
+def add_rows_cols(A, r, n, inds, value = 0):
+    inds.sort()
+    for ind in inds:
+        A = np.insert(A, ind, value, axis = 0)
+        A = np.insert(A, ind, value, axis = 1)
+        r = np.insert(r, ind, value)
+        n = np.insert(n, ind, value)
+    return A, r, n
+
+
 def gen_reduced_params(A,r,inds = None, reps = 1):
+    # inds is the species nums to remove
     A_output, r_output, n_output = None, None, None
     if inds != None:
         A, r = remove_rows_cols(A, r, inds)
     for i in range(reps):
         Ap, rp, Np = gen_stable_param_set(A, r)
+        if inds != None:
+            Ap, rp, Np = add_rows_cols(Ap, rp, Np, inds)
         if i == 0:
             A_output = np.array([Ap])
             r_output = np.array([rp])
@@ -177,5 +190,5 @@ J = calc_jacobian(A,r,n)
 st = calc_stability(A, r, n)
 # print(st)
 print(gen_stable_param_set(A,r))
-remove_rows_cols(A,r,[2,5])
+# remove_rows_cols(A,r,[2,5])
 print(gen_reduced_params(A,r,[2,5],5))
