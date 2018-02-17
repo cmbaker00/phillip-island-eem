@@ -167,21 +167,16 @@ def add_rows_cols(A, r, n, inds, value = 0):
 
 def gen_reduced_params(A,r,inds = None, reps = 1):
     # inds is the species nums to remove
-    A_output, r_output, n_output = None, None, None
+    A_output, r_output, n_output = [], [], []
     if inds != None:
         A, r = remove_rows_cols(A, r, inds)
     for i in range(reps):
         Ap, rp, Np = gen_stable_param_set(A, r)
         if inds != None:
             Ap, rp, Np = add_rows_cols(Ap, rp, Np, inds)
-        if i == 0:
-            A_output = [Ap]
-            r_output = [rp]
-            n_output = [Np]
-        else:
-            A_output.append(Ap)
-            r_output.append(rp)
-            n_output.append(Np)
+        A_output.append(Ap)
+        r_output.append(rp)
+        n_output.append(Np)
     A_output = np.array(A_output)
     r_output = np.array(r_output)
     n_output = np.array(n_output)
