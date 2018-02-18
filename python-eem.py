@@ -184,6 +184,8 @@ def gen_reduced_params(A,r,inds = None, reps = 1):
 
 def de(t, y, A, r):
     return r*y + np.matmul(A,y)*y
+
+
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
 n = equilibrium_state(A,r)
@@ -192,4 +194,10 @@ st = calc_stability(A, r, n)
 # print(st)
 print(gen_stable_param_set(A,r))
 # remove_rows_cols(A,r,[2,5])
-print(gen_reduced_params(A,r,[2,5],5)) #TODO this returns a bunch of nested arrays
+print(gen_reduced_params(A,r,[2,5],5))
+
+Ap, rp, Np = gen_reduced_params(A, r, [2, 5],1)
+r = ode(de).set_integrator('zvode',method = 'bdf', with_jacobian = False)
+r.set_initial_value(Np,0).set_f_params(Ap, rp)
+t1 = 1
+r.integrate(1) #value is the new time
