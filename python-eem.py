@@ -5,8 +5,9 @@ import numpy as np
 import numpy.matlib
 from scipy.integrate import ode
 
+
 def read_matrix(fname):
-    wb = load_workbook(filename = fname)
+    wb = load_workbook(filename=fname)
     sheets = wb.sheetnames
     ws = wb[sheets[0]]
     n_row = num_rows(ws)
@@ -16,79 +17,88 @@ def read_matrix(fname):
     m = np.array(read_all_rows(ws, 2, n_row, 2, n_col))
     return m
 
+
 def read_vector(fname):
-    wb = load_workbook(filename = fname)
+    wb = load_workbook(filename=fname)
     sheets = wb.sheetnames
     ws = wb[sheets[0]]
-    n_row = num_rows(ws, st = 1)
-    r = np.array(read_all_rows(ws, 1, n_row, 2, 2))
-    return r
+    num_row = num_rows(ws, st_pt=1)
+    output = np.array(read_all_rows(ws, 1, num_row, 2, 2))
+    return output
 
 
-def read_row(ws, row, st, ed):
+def read_row(ws, row, st_pt, ed_pt):
     counter = 1
     output = []
     for s in iter_all_strings():
-        if counter >= st:
+        if counter >= st_pt:
             output.append(ws[s + str(row)].value)
-        if counter == ed:
+        if counter == ed_pt:
             return output
         counter += 1
 
-def read_all_rows(ws, rows, rowe, st, ed):
+
+def read_all_rows(ws, rows, rowe, st_pt, ed_pt):
     arr = []
     for row in range(rows, rowe + 1):
-        c_row = read_row(ws, row, st, ed)
+        c_row = read_row(ws, row, st_pt, ed_pt)
         c_row = none_2_zero(c_row)
         arr.append(c_row)
     return arr
 
+
 def none_2_zero(arr):
     for i in range(len(arr)):
-        if arr[i] == None:
+        if arr[i] is None:
             arr[i] = 0
     return arr
 
-def num_rows(ws, st = 2):
+
+def num_rows(ws, st_pt=2):
     flag = True
     while flag:
-        if ws['A'+str(st)].value == None:
-            return st - 1
+        if ws['A' + str(st_pt)].value is None:
+            return st_pt - 1
         else:
-            st += 1
+            st_pt += 1
 
-def num_cols(ws, st = 2):
+
+def num_cols(ws, st_pt=2):
     count = 1
     for s in iter_all_strings():
-        if count < st:
+        if count < st_pt:
             count += 1
             continue
-        if ws[s + str(1)].value == None:
+        if ws[s + str(1)].value is None:
             return count - 1
         else:
             count += 1
+
 
 def iter_all_strings():
     size = 1
     while True:
         for s in itertools.product(ascii_lowercase, repeat=size):
             yield "".join((s.upper() for s in s))
-        size +=1
+        size += 1
 
-def equilibrium_state(A,r):
-    iA = np.linalg.inv(A)
-    n = -np.matmul(iA,r)
-    return n
 
-def calc_jacobian(A,r,n):
+def equilibrium_state(amatrix, r_input):
+    ia = np.linalg.inv(amatrix)
+    n_eq = -np.matmul(ia, r_input)
+    return n_eq
+
+
+def calc_jacobian(A, r, n):
     i_matrix = np.eye(len(n))
     if len(n.shape) == 1:
-        n_array = np.matlib.repmat(n,len(n),1).T
+        n_array = np.matlib.repmat(n, len(n), 1).T
     else:
-        n_array = np.matlib.repmat(n,1,len(n))
-    J = i_matrix*r + A*n_array + i_matrix*np.matmul(A,n)
+        n_array = np.matlib.repmat(n, 1, len(n))
+    J = i_matrix * r + A * n_array + i_matrix * np.matmul(A, n)
 
     return J
+
 
 def calc_stability(A, r, n):
     J = calc_jacobian(A, r, n)
@@ -99,24 +109,26 @@ def calc_stability(A, r, n):
     else:
         return False
 
-def draw_parameters(A,r):
-    int_str = np.random.uniform(0,1,np.shape(A))
+
+def draw_parameters(A, r):
+    int_str = np.random.uniform(0, 1, np.shape(A))
     unc_int = np.abs(A) == 2
-    unc_draws = np.random.uniform(0,1,np.shape(A))
+    unc_draws = np.random.uniform(0, 1, np.shape(A))
     A[(unc_draws < .5) & unc_int] = 0
-    A[A==2] = 1
-    A[A==-2] = -1
-    A_vals = (A*int_str)
+    A[A == 2] = 1
+    A[A == -2] = -1
+    A_vals = (A * int_str)
     # A_vals = multiply_diag(A_vals)
     A_vals -= np.eye(np.shape(A_vals)[0])
-    r_vals = np.random.uniform(0,1,np.shape(r))
+    r_vals = np.random.uniform(0, 1, np.shape(r))
     return A_vals, r_vals
 
-def gen_stable_param_set(A,r):
+
+def gen_stable_param_set(A, r):
     flag = 0
     count = 0
     while flag == 0:
-        At, rt = draw_parameters(A,r)
+        At, rt = draw_parameters(A, r)
         n = equilibrium_state(At, rt)
         if np.all(n > 0):
             st = calc_stability(At, rt, n)
@@ -125,25 +137,27 @@ def gen_stable_param_set(A,r):
         count += 1
         print(count)
 
-def multiply_diag(A, factor):
-    A[np.eye(A.shape[0]) == 1] = A[np.eye(A.shape[0]) == 1] * factor
-    return A
 
-def remove_row_col(A,ind):
-    A_shp = A.shape[0]
+def multiply_diag(a, factor):
+    a[np.eye(a.shape[0]) == 1] = a[np.eye(a.shape[0]) == 1] * factor
+    return a
+
+
+def remove_row_col(a_matrix, ind):
+    a_shp = a_matrix.shape[0]
     if ind == 0:
-        return A[1:A_shp, 1:A_shp]
-    if ind == A_shp - 1:
-        return A[0:A_shp - 1, 1:A_shp - 1]
-    #If it is a 'central' option
-    A_top_left = A[0:ind, 0:ind]
-    A_top_right = A[0:ind, ind+1:A_shp]
-    A_bottom_left = A[ind+1:A_shp, 0:ind]
-    A_bottom_right = A[ind+1:A_shp, ind+1:A_shp]
-    A_top = np.hstack([A_top_left, A_top_right])
-    A_bottom = np.hstack([A_bottom_left, A_bottom_right])
-    A_new = np.vstack([A_top, A_bottom])
-    return A_new
+        return a_matrix[1:a_shp, 1:a_shp]
+    if ind == a_shp - 1:
+        return A[0:a_shp - 1, 1:a_shp - 1]
+    # If it is a 'central' option
+    a_top_left = a_matrix[0:ind, 0:ind]
+    a_top_right = a_matrix[0:ind, ind + 1:a_shp]
+    a_bottom_left = a_matrix[ind + 1:a_shp, 0:ind]
+    a_bottom_right = a_matrix[ind + 1:a_shp, ind + 1:a_shp]
+    a_top = np.hstack([a_top_left, a_top_right])
+    a_bottom = np.hstack([a_bottom_left, a_bottom_right])
+    a_new = np.vstack([a_top, a_bottom])
+    return a_new
 
 
 def remove_rows_cols(A, r, inds):
@@ -155,24 +169,25 @@ def remove_rows_cols(A, r, inds):
     rn = np.delete(r, inds)
     return An, rn
 
-def add_rows_cols(A, r, n, inds, value = 0):
+
+def add_rows_cols(A, r, n, inds, value=0):
     inds.sort()
     for ind in inds:
-        A = np.insert(A, ind, value, axis = 0)
-        A = np.insert(A, ind, value, axis = 1)
+        A = np.insert(A, ind, value, axis=0)
+        A = np.insert(A, ind, value, axis=1)
         r = np.insert(r, ind, value)
         n = np.insert(n, ind, value)
     return A, r, n
 
 
-def gen_reduced_params(A,r,inds = None, reps = 1):
+def gen_reduced_params(A, r, inds=None, reps=1):
     # inds is the species nums to remove
     A_output, r_output, n_output = [], [], []
-    if inds != None:
+    if inds is not None:
         A, r = remove_rows_cols(A, r, inds)
     for i in range(reps):
         Ap, rp, Np = gen_stable_param_set(A, r)
-        if inds != None:
+        if inds is not None:
             Ap, rp, Np = add_rows_cols(Ap, rp, Np, inds)
         A_output.append(Ap)
         r_output.append(rp)
@@ -182,27 +197,30 @@ def gen_reduced_params(A,r,inds = None, reps = 1):
     n_output = np.array(n_output)
     return A_output, r_output, n_output
 
+
 def de(t, y, A, r):
-    return r*y + np.matmul(A,y)*y
+    return r * y + np.matmul(A, y) * y
+
 
 def de_solve(T, y, A, r):
     rde = ode(de).set_integrator('zvode', method='bdf', with_jacobian=False)
     rde.set_initial_value(y, 0).set_f_params(A, r)
     return np.real(rde.integrate(T))
 
+
 A = read_matrix('Phillip_islands_community.xlsx')
 r = read_vector('Phillip_islands_r.xlsx')
-n = equilibrium_state(A,r)
-J = calc_jacobian(A,r,n)
+n = equilibrium_state(A, r)
+J = calc_jacobian(A, r, n)
 st = calc_stability(A, r, n)
 # print(st)
-print(gen_stable_param_set(A,r))
+print(gen_stable_param_set(A, r))
 # remove_rows_cols(A,r,[2,5])
 # print(gen_reduced_params(A,r,[2,5],5))
 
-Ap, rp, Np = gen_reduced_params(A, r, [2, 5],1)
+Ap, rp, Np = gen_reduced_params(A, r, [2, 5], 1)
 Ap = Ap[0]
 rp = rp[0]
 Np = Np[0]
 Np[0] = 0
-New_N = de_solve(1,Np,Ap,rp)
+New_N = de_solve(1, Np, Ap, rp)
