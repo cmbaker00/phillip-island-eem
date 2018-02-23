@@ -208,20 +208,20 @@ def de_solve(T, y, A, r):
     return np.real(rde.integrate(T))
 
 print(__name__)
-# if __name__ == "__main__":
-#     A = read_matrix('Phillip_islands_community.xlsx')
-#     r = read_vector('Phillip_islands_r.xlsx')
-#     n = equilibrium_state(A, r)
-#     J = calc_jacobian(A, r, n)
-#     st = calc_stability(A, r, n)
-#     # print(st)
-#     print(gen_stable_param_set(A, r))
-#     # remove_rows_cols(A,r,[2,5])
-#     # print(gen_reduced_params(A,r,[2,5],5))
-#
-#     Ap, rp, Np = gen_reduced_params(A, r, [2, 5], 1)
-#     Ap = Ap[0]
-#     rp = rp[0]
-#     Np = Np[0]
-#     Np[0] = 0
-#     New_N = de_solve(1, Np, Ap, rp)
+if __name__ == "__main__":
+    A = read_matrix('Phillip_islands_community.xlsx')
+    r = read_vector('Phillip_islands_r.xlsx')
+    n = equilibrium_state(A, r)
+    J = calc_jacobian(A, r, n)
+    st = calc_stability(A, r, n)
+    # print(st)
+    print(gen_stable_param_set(A, r))
+    # remove_rows_cols(A,r,[2,5])
+    # print(gen_reduced_params(A,r,[2,5],5))
+
+    Ap, rp, Np = gen_reduced_params(A, r, [2, 5], 1)
+    Ap = Ap[0]
+    rp = rp[0]
+    Np = Np[0]
+    Np[0] = 0
+    New_N = de_solve(1, Np, Ap, rp)
