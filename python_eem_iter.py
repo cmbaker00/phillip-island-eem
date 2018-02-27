@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import numpy.matlib
 from scipy.integrate import ode
-
+import copy
 
 def read_matrix(fname):
     wb = load_workbook(filename=fname)
@@ -135,7 +135,7 @@ def gen_stable_param_set(A, r):
             if st:
                 return At, rt, n
         count += 1
-        print(count)
+        # print(count)
 
 
 def multiply_diag(a, factor):
@@ -148,7 +148,7 @@ def remove_row_col(a_matrix, ind):
     if ind == 0:
         return a_matrix[1:a_shp, 1:a_shp]
     if ind == a_shp - 1:
-        return A[0:a_shp - 1, 1:a_shp - 1]
+        return a_matrix[0:a_shp - 1, 1:a_shp - 1]
     # If it is a 'central' option
     a_top_left = a_matrix[0:ind, 0:ind]
     a_top_right = a_matrix[0:ind, ind + 1:a_shp]
@@ -203,25 +203,68 @@ def de(t, y, A, r):
 
 
 def de_solve(T, y, A, r):
-    rde = ode(de).set_integrator('zvode', method='bdf', with_jacobian=False)
+    rde = ode(de).set_integrator('lsoda', method='bdf', with_jacobian=False)
     rde.set_initial_value(y, 0).set_f_params(A, r)
     return np.real(rde.integrate(T))
 
 
-if __name__ == "__main__":
-    A = read_matrix('Phillip_islands_community.xlsx')
-    r = read_vector('Phillip_islands_r.xlsx')
-    # n = equilibrium_state(A, r)
-    # J = calc_jacobian(A, r, n)
-    # st = calc_stability(A, r, n)
-    # print(st)
-    # print(gen_stable_param_set(A, r))
-    # remove_rows_cols(A,r,[2,5])
-    # print(gen_reduced_params(A,r,[2,5],5))
+class EEM:
+    def __init__(self, a, r, rem=None, max_sets=np.inf):
+        self.a = a
+        self.r = r
+        self.rem = rem
+        self.max = max_sets
+        self.counter = 0
 
-    Ap, rp, Np = gen_reduced_params(A, r, [2, 5], 1)
-    Ap = Ap[0]
-    rp = rp[0]
-    Np = Np[0]
-    Np[0] = 0
-    New_N = de_solve(1, Np, Ap, rp)
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.counter >= self.max:
+            raise StopIteration
+        Ap, rp, Np = gen_reduced_params(self.a, self.r, self.rem, 1)
+        self.counter += 1
+        return Ap[0], rp[0], Np[0]
+
+class EEM_rem:
+    def __init__(self, EEM_gen, removal, response, max_iter=np.inf):
+        self.EEM_gen = EEM_gen
+        self.rem = removal
+        self.resp = np.array(response)
+        self.count = 0
+        self.max = max_iter
+
+    def __iter__(self):
+        iter(self.EEM_gen)
+        return self
+
+    def __next__(self):
+        if self.count >= self.max:
+            raise StopIteration
+        flag = 0
+        c = 0
+        while flag == 0:
+            c += 1
+            # print(c)
+            a, r, n = next(self.EEM_gen)
+            n_change = copy.copy(n)
+            n_change[self.rem] = 0
+            n_new = de_solve(.1, n_change, a, r)
+            change = n_new > n
+            # print(change[self.resp[:,0]])
+            if (change[self.resp[:, 0]] == self.resp[:, 1]).all():
+                flag = 1
+        self.count += 1
+        # print(a, r, n)
+        return a, r, n
+
+if __name__ == "__main__":
+    a_input = read_matrix('Phillip_islands_community.xlsx').transpose()
+    r_input = read_vector('Phillip_islands_r.xlsx')
+    gen_init_stable = EEM(a_input, r_input, [2, 5])
+    response = [[7, True], [10, True], [15, True]]
+    gen_cond_params = EEM_rem(gen_init_stable, 0, response, max_iter=10)
+    # iter(gen_cond_params)
+    # print(next(gen_cond_params))
+    reps = 5
+    param_sets = [[params[0], params[1], params[2]] for params in gen_cond_params]
