@@ -209,7 +209,7 @@ def de_solve(T, y, A, r):
 
 
 if __name__ == "__main__":
-    A = read_matrix('Phillip_islands_community.xlsx')
+    A = read_matrix('Phillip_islands_community.xlsx').transpose()
     r = read_vector('Phillip_islands_r.xlsx')
     # n = equilibrium_state(A, r)
     # J = calc_jacobian(A, r, n)
