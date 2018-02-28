@@ -179,16 +179,26 @@ def add_rows_cols(A, r, n, inds, value=0):
         n = np.insert(n, ind, value)
     return A, r, n
 
+def gen_other_params(Ap, A_input, rp):
+    A_draw, r_draw = draw_parameters(A_input, r_input)
+    locs = (A_input != 0) == (Ap == 0)
+    rlocs = rp == 0
+    Ap[locs] = A_draw[locs]
+    rp[rlocs] = r_draw[rlocs]
+    return Ap, rp
 
-def gen_reduced_params(A, r, inds=None, reps=1):
+def gen_reduced_params(A_input, r, inds=None, reps=1):
     # inds is the species nums to remove
     A_output, r_output, n_output = [], [], []
     if inds is not None:
-        A, r = remove_rows_cols(A, r, inds)
+        A, r = remove_rows_cols(A_input, r, inds)
+    else:
+        A = A_input
     for i in range(reps):
         Ap, rp, Np = gen_stable_param_set(A, r)
         if inds is not None:
             Ap, rp, Np = add_rows_cols(Ap, rp, Np, inds)
+            Ap, rp = gen_other_params(Ap, A_input, rp)
         A_output.append(Ap)
         r_output.append(rp)
         n_output.append(Np)
@@ -258,13 +268,41 @@ class EEM_rem:
         # print(a, r, n)
         return a, r, n
 
+class EEM_stable_from_prev_conds:
+    def __init__(self, EEM_gen, removal, max_iter=np.inf):
+        self.EEM_gen = EEM_gen
+        self.rem = removal
+        self.count = 0
+        self.max = max_iter
+
+    def __iter__(self):
+        iter(self.EEM_gen)
+        return self
+
+    def __next__(self):
+        if self.count >= self.max:
+            raise StopIteration
+        flag = 0
+        while flag == 0:
+            a, r, n = next(self.EEM_gen)
+            a_rem, r_rem = remove_rows_cols(a, r, self.rem)
+            n_rem = equilibrium_state(a_rem, r_rem)
+            if calc_stability(a_rem, r_rem, n_rem):
+                for ind in np.sort(self.rem): #reinsert the appropriate zeros
+                    n_rem = np.insert(n_rem, ind, 0)
+                self.count += 1
+                return a, r, n_rem
+
 if __name__ == "__main__":
+    response = [[7, True], [10, True], [15, True]] # these increase
+    rem_node = [0]
+    reps = 1000
     a_input = read_matrix('Phillip_islands_community.xlsx').transpose()
     r_input = read_vector('Phillip_islands_r.xlsx')
     gen_init_stable = EEM(a_input, r_input, [2, 5])
-    response = [[7, True], [10, True], [15, True]]
-    gen_cond_params = EEM_rem(gen_init_stable, 0, response, max_iter=10)
-    # iter(gen_cond_params)
-    # print(next(gen_cond_params))
-    reps = 5
-    param_sets = [[params[0], params[1], params[2]] for params in gen_cond_params]
+    gen_cond_params = EEM_rem(gen_init_stable, rem_node, response, max_iter=reps)
+    final_removed = [0, 16]
+    gen_final_param_set = EEM_stable_from_prev_conds(gen_cond_params, final_removed)
+    iter(gen_final_param_set)
+    next(gen_final_param_set)
+    # param_sets = [[params[0], params[1], params[2]] for params in gen_cond_params]
