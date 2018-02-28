@@ -218,6 +218,17 @@ def de_solve(T, y, A, r):
     rde.set_initial_value(y, 0).set_f_params(A, r)
     return np.real(rde.integrate(T))
 
+def de_fix(t, y, A, r, f_id):
+    rates = r * y + np.matmul(A, y) * y
+    rates[f_id] = 0
+    return rates
+
+
+def de_solve_fix(T, y, A, r, f_id):
+    rde = ode(de_fix).set_integrator('lsoda', method='bdf', with_jacobian=False)
+    rde.set_initial_value(y, 0).set_f_params(A, r, f_id)
+    return np.real(rde.integrate(T))
+
 
 class EEM:
     def __init__(self, a, r, rem=None, max_sets=np.inf):
@@ -294,6 +305,45 @@ class EEM_stable_from_prev_conds:
                 self.count += 1
                 return a, r, n_rem
 
+class EEM_reintro:
+    def __init__(self, ensemble, reintro_id, control_id, control_amount):
+        self.ensemble = ensemble
+        self.reintro = reintro_id
+        self.control = control_id
+        self.control_level = control_amount
+        self.max = len(ensemble)
+        self.count = 0
+        self.outcomes = []
+
+    def __iter__(self):
+        return self
+
+
+    def __next__(self):
+        if self.count >= self.max:
+            raise StopIteration
+        ratio = self.get_outcome(self.count)
+        self.outcomes.append(ratio)
+        self.count += 1
+        return ratio
+
+    def get_outcome(self, pset):
+        if pset < len(self.outcomes):
+            return self.outcomes[pset]
+        param_set = self.ensemble[pset]
+        a = param_set[0]
+        r = param_set[1]
+        n = param_set[2]
+        start_abund = np.min(n[n != 0])
+        n[self.reintro] = start_abund
+        n[self.control] = n[self.control]*self.control_level
+        n_new = de_solve_fix(10, n, a, r, self.control)
+        ratio = n_new/n
+        ratio[np.isnan(ratio)] = 0
+        return ratio
+
+
+
 
 def save_object(obj, filename):
     with open(filename, 'wb') as output:  # Overwrites any existing file.
@@ -317,6 +367,8 @@ def generate_phillip_island_ensemble(fname='PI_EEM', rep=10000):
     save_object(param_sets, fname)
 
 if __name__ == "__main__":
-    reps = 10000
+    reps = 1000
     generate_phillip_island_ensemble(rep=reps)
     ensemble = load_object('PI_EEM_{0}.pkl'.format(reps))
+    reintro = EEM_reintro(ensemble, 16, 1, .5)
+    reintro.get_outcome(5)
