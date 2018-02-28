@@ -6,6 +6,7 @@ import numpy.matlib
 from scipy.integrate import ode
 import copy
 import pickle
+import matplotlib.pyplot as plt
 
 def read_matrix(fname):
     wb = load_workbook(filename=fname)
@@ -368,7 +369,14 @@ def generate_phillip_island_ensemble(fname='PI_EEM', rep=10000):
 
 if __name__ == "__main__":
     reps = 1000
-    generate_phillip_island_ensemble(rep=reps)
+    # generate_phillip_island_ensemble(rep=reps)
     ensemble = load_object('PI_EEM_{0}.pkl'.format(reps))
-    reintro = EEM_reintro(ensemble, 16, 1, .5)
-    reintro.get_outcome(5)
+    control = [1]  # controlling cats
+    control_level = .5 # control cats to 50% of current
+    reintro_sp = [16]  # reintroduce bandicoots
+    reintro = EEM_reintro(ensemble, reintro_sp, control, control_level)
+    bandicoot_data = [abund[reintro_sp][0] for abund in reintro]
+    mean_increase = np.mean(np.array(bandicoot_data)>1)
+    plt.hist(bandicoot_data, bins='auto')
+    plt.title("Frequency of increase: {}".format((int(mean_increase*1000))/1000))
+    plt.show()
