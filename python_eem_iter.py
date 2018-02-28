@@ -5,6 +5,7 @@ import numpy as np
 import numpy.matlib
 from scipy.integrate import ode
 import copy
+import pickle
 
 def read_matrix(fname):
     wb = load_workbook(filename=fname)
@@ -180,7 +181,7 @@ def add_rows_cols(A, r, n, inds, value=0):
     return A, r, n
 
 def gen_other_params(Ap, A_input, rp):
-    A_draw, r_draw = draw_parameters(A_input, r_input)
+    A_draw, r_draw = draw_parameters(A_input, rp)
     locs = (A_input != 0) == (Ap == 0)
     rlocs = rp == 0
     Ap[locs] = A_draw[locs]
@@ -293,16 +294,29 @@ class EEM_stable_from_prev_conds:
                 self.count += 1
                 return a, r, n_rem
 
-if __name__ == "__main__":
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as output:  # Overwrites any existing file.
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+
+def load_object(filename):
+    with open(filename, 'rb') as input:
+        return pickle.load(input)
+
+def generate_phillip_island_ensemble(fname='PI_EEM', rep=10000):
     response = [[7, True], [10, True], [15, True]] # these increase
     rem_node = [0]
-    reps = 1000
     a_input = read_matrix('Phillip_islands_community.xlsx').transpose()
     r_input = read_vector('Phillip_islands_r.xlsx')
     gen_init_stable = EEM(a_input, r_input, [2, 5])
-    gen_cond_params = EEM_rem(gen_init_stable, rem_node, response, max_iter=reps)
+    gen_cond_params = EEM_rem(gen_init_stable, rem_node, response)
     final_removed = [0, 16]
-    gen_final_param_set = EEM_stable_from_prev_conds(gen_cond_params, final_removed)
-    iter(gen_final_param_set)
-    next(gen_final_param_set)
-    # param_sets = [[params[0], params[1], params[2]] for params in gen_cond_params]
+    gen_final_param_set = EEM_stable_from_prev_conds(gen_cond_params, final_removed, max_iter=rep)
+    param_sets = [[params[0], params[1], params[2]] for params in gen_final_param_set]
+    fname = fname + '_' + str(rep) + '.pkl'
+    save_object(param_sets, fname)
+
+if __name__ == "__main__":
+    reps = 10000
+    generate_phillip_island_ensemble(rep=reps)
+    ensemble = load_object('PI_EEM_{0}.pkl'.format(reps))
