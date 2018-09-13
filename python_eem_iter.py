@@ -307,7 +307,7 @@ class EEM_stable_from_prev_conds:
                 return a, r, n_rem
 
 class EEM_reintro:
-    def __init__(self, ensemble, reintro_id, control_id, control_amount):
+    def __init__(self, ensemble, reintro_id, control_id, control_amount, T = 10):
         self.ensemble = ensemble
         self.reintro = reintro_id
         self.control = control_id
@@ -315,6 +315,7 @@ class EEM_reintro:
         self.max = len(ensemble)
         self.count = 0
         self.outcomes = []
+        self.T = T
 
     def __iter__(self):
         return self
@@ -338,7 +339,7 @@ class EEM_reintro:
         start_abund = np.min(n[n != 0])
         n[self.reintro] = start_abund
         n[self.control] = n[self.control]*self.control_level
-        n_new = de_solve_fix(10, n, a, r, self.control)
+        n_new = de_solve_fix(self.T, n, a, r, self.control)
         ratio = n_new/n
         ratio[np.isnan(ratio)] = 0
         return ratio
