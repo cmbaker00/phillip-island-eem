@@ -7,6 +7,7 @@ from scipy.integrate import ode
 import copy
 import pickle
 import matplotlib.pyplot as plt
+import copy
 
 def read_matrix(fname):
     wb = load_workbook(filename=fname)
@@ -336,11 +337,15 @@ class EEM_reintro:
         a = param_set[0]
         r = param_set[1]
         n = param_set[2]
+        n_old = copy.copy(n)
         start_abund = np.min(n[n != 0])
-        n[self.reintro] = start_abund
-        n[self.control] = n[self.control]*self.control_level
+        if len(self.reintro) > 0:
+            n[self.reintro] = start_abund
+        n_old = copy.copy(n)
+        if len(self.control) > 0:
+            n[self.control] = n[self.control]*self.control_level
         n_new = de_solve_fix(self.T, n, a, r, self.control)
-        ratio = n_new/n
+        ratio = n_new/n_old
         ratio[np.isnan(ratio)] = 0
         return ratio
 
@@ -377,7 +382,7 @@ if __name__ == "__main__":
     control_level = .5 # control cats to 50% of current
     reintro_sp = [16]  # reintroduce bandicoots
     reintro = EEM_reintro(ensemble, reintro_sp, control, control_level)
-    bandicoot_data = [abund[reintro_sp][0] for abund in reintro]
+    bandicoot_data = [abund[16] for abund in reintro]
     mean_increase = np.mean(np.array(bandicoot_data)>1)
     plt.hist(bandicoot_data, bins='auto')
     plt.title("Frequency of increase: {}".format((int(mean_increase*1000))/1000))
