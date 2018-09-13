@@ -355,14 +355,12 @@ def load_object(filename):
     with open(filename, 'rb') as input:
         return pickle.load(input)
 
-def generate_phillip_island_ensemble(fname='PI_EEM', rep=10000):
-    response = [[7, True], [10, True], [15, True]] # these increase
-    rem_node = [0]
+def generate_phillip_island_ensemble(fname='PI_EEM', rep=10000, response = [], rem_node = [], final_removed=[]):
     a_input = read_matrix('Phillip_islands_community.xlsx').transpose()
     r_input = read_vector('Phillip_islands_r.xlsx')
     gen_init_stable = EEM(a_input, r_input, [2, 5])
     gen_cond_params = EEM_rem(gen_init_stable, rem_node, response)
-    final_removed = [0, 16]
+
     gen_final_param_set = EEM_stable_from_prev_conds(gen_cond_params, final_removed, max_iter=rep)
     param_sets = [[params[0], params[1], params[2]] for params in gen_final_param_set]
     fname = fname + '_' + str(rep) + '.pkl'
@@ -370,7 +368,10 @@ def generate_phillip_island_ensemble(fname='PI_EEM', rep=10000):
 
 if __name__ == "__main__":
     reps = 1000
-    # generate_phillip_island_ensemble(rep=reps)
+    rem_node = [0] # node to be removed
+    response = [[7, True], [10, True], [15, True]] # these increase when node is removed
+    final_removed = [0, 16] # return an ensemble without these species
+    # generate_phillip_island_ensemble(rep=reps, response = [[7, True], [10, True], [15, True]], rem_node = [0],final_removed = [0, 16])
     ensemble = load_object('PI_EEM_{0}.pkl'.format(reps))
     control = [1]  # controlling cats
     control_level = .5 # control cats to 50% of current
